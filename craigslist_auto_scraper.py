@@ -1,13 +1,22 @@
+"""
+Craigslist Auto Scraper
+Kablam!
+"""
+
+import re
 import requests
+import time
 from lxml import html
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 
 class Listing:
+    """An individual listing"""
     condition = None
     cylinders = None
     drive = None
     fuel = None
     location = None
+    make = None
     odometer = None
     paint_color = None
     size = None
@@ -16,58 +25,60 @@ class Listing:
     url = None
     vin = None
 
-    def __init__(condition, cylinders, drive, fuel, location, odometer, paint_color, size, title_status, transmission, url, vin):
+    def __init__(self, condition, cylinders, drive, fuel, location, make, odometer,
+                 paint_color, size, title_status, transmission, url, vin):
         self.condition = condition
-        self.cylinders
-        self.drive
-        self.fuel
-        self.location
-        self.odometer
-        self.paint_color
-        self.size
-        self.title_status
-        self.transmission
-        self.url
-        self.vin
+        self.cylinders = cylinders
+        self.drive = drive
+        self.fuel = fuel
+        self.location = location
+        self.make = make
+        self.odometer = odometer
+        self.paint_color = paint_color
+        self.size = size
+        self.title_status = title_status
+        self.transmission = transmission
+        self.url = url
+        self.vin = vin
 
-urls = []
+URLS = []
 
-cities = [
-        # "atlanta",
-        # "austin",
-        # "boston",
-        # "chicago",
-        # "dallas",
-        # "denver",
-        # "detroit",
-        # "houston",
-        # "lasvegas",
-        # "losangeles",
-        # "miami",
-        # "newyork",
-        # "orangecounty",
-        # "philadelphia",
-        # "phoenix",
-        # "portland",
-        # "raleigh",
-        # "sacramento",
-        # "sandiego",
-        # "seattle",
-        # "sfbay"
+CITIES = [# "atlanta",
+          # "austin",
+          # "boston",
+          # "chicago",
+          "dallas",
+          # "denver",
+          # "detroit",
+          # "houston",
+          # "lasvegas",
+          # "losangeles",
+          # "miami",
+          # "newyork",
+          # "orangecounty",
+          # "philadelphia",
+          # "phoenix",
+          # "portland",
+          # "raleigh",
+          # "sacramento",
+          # "sandiego",
+          # "seattle",
+          # "sfbay",
     ]
 
-keywords = [
-    "mercedes benz sprinter",
-    # "dodge promaster",
-    "ford transit",
-    # "nissan nv",
-    # "minibus"
+KEYWORDS = ["minibus",
+            "mercedes benz sprinter",
+            # "dodge promaster",
+            # "ford transit",
+            # "nissan nv",
+            # "minibus",
 ]
 
 def generate_start_urls():
+    """Generate start URLs"""
     start_urls = []
-    for city in cities:
-        for keyword in keywords:
+    for city in CITIES:
+        for keyword in KEYWORDS:
             if " " in keyword:
                 kws = keyword.split(" ")
                 keyword = ""
@@ -78,6 +89,7 @@ def generate_start_urls():
     return start_urls
 
 def generate_individual_list_urls(start_urls):
+    """Generate individual list URLs"""
     il_urls = []
     for start_url in start_urls:
         page = requests.get(start_url)
@@ -86,14 +98,82 @@ def generate_individual_list_urls(start_urls):
     return il_urls
 
 def parse_page(url):
+    """Parse page"""
     page = requests.get(url)
     tree = html.fromstring(page.content)
     spans = tree.xpath("//p[@class='attrgroup']/span")
+
+    vin = None
+    condition = None
+    cylinders = None
+    drive = None
+    fuel = None
+    odometer = None
+    paint_color = None
+    size = None
+    title_status = None
+    transmission = None
+    make = None
+
     for span in spans:
-        print span.text, span.xpath("b/text()")
+        field = span.text
+        if field != None:
+            field = field.lower()
+
+        value = span.xpath("b/text()")
+        if value != []:
+            value = value[0]
+
+        # missing location and url
+        if field != None:
+            if "vin" in field:
+                vin = value
+            elif "condition" in field:
+                condition = value
+            elif "cylinders" in field:
+                cylinders = value
+            elif "drive" in field:
+                drive = value
+            elif "fuel" in field:
+                fuel = value
+            elif "odometer" in field:
+                odometer = value
+            elif "paint color" in field:
+                paint_color = value
+            elif "size" in field:
+                size = value
+            elif "title status" in field:
+                title_status = value
+            elif "transmission" in field:
+                transmission = value
+            else:
+                # If it has a year value, we'll store it as the make
+                if re.match(r'[0-9]{4}', field):
+                    make = field
+
+    start_index = url.find("//")
+    end_index = url.find(".craigs")
+    location = url[start_index + 2:end_index]
+
+    print (condition, cylinders, drive, fuel, location, make, odometer,
+           paint_color, size, title_status, transmission, url, vin)
+
+    return Listing(condition, cylinders, drive, fuel, location, make, odometer,
+                   paint_color, size, title_status, transmission, url, vin)
+
+def run():
+    """main"""
+    listings = []
+    start_urls = generate_start_urls()
+    il_urls = generate_individual_list_urls(start_urls)
+
+    for il_url in il_urls:
+        time.sleep(.75)
+        listings.append(parse_page(il_url))
+
+    # for listing in listings:
+    #     print listing
 
 
 if __name__ == "__main__":
-    # start_urls = generate_start_urls()
-    # il_urls = generate_individual_list_urls(start_urls)
-    parse_page("https://portland.craigslist.org/clc/ctd/d/2006-dodge-sprinter-2500/6324920484.html")
+    run()
