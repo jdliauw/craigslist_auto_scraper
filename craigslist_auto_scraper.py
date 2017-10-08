@@ -75,6 +75,38 @@ KEYWORDS = ["minibus",
             # "minibus",
 ]
 
+"""
+    MULTIPLE (just add again)
+
+    condition: &condition=
+    10=new, 20=like new, 30=excellent, 40=good, 50=fair, 60=salvage
+
+    cylinders: &auto_cylinders=
+    1=3,2=4,3=5,4=6,5=8,6=10,7=12
+
+    drive: &auto_drivetrain=
+    1=fwd,2=rwd,3=4wd 
+
+    fuel: &auto_fuel_type=
+    1=gas,2=diesel,3=hybrid,4=electric,5=other
+
+    color: &auto_paint=
+    1=black,2=blue,20=brown,3=green,4=grey,5=orange,6=purple,7=red,8=silver,9=white,10=yellow,11=custom
+
+    size: &auto_size=1
+    1=compact,2=full-size,3=mid-size,4=sub-compact
+
+    title_status: &auto_title_status=
+    1=clean,2=salvage,3=rebuilt,4=parts only,5=lien,6=missing
+
+    transmission: &auto_transmission=
+    1=manual,2=automatic,3=other
+
+    type: &auto_bodytype=
+    1=bus,2=convertible,3=coupe,4=hatchback,5=mini-van,6=offroad,7=pickup,8=sedan,9=truck,10=SUV,11=wagon,12=van,13=other
+
+"""
+
 def generate_start_urls():
     """Generate start URLs"""
     start_urls = []
