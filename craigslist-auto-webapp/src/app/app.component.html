@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Craigslist Auto Search</title>
+  <base href="/">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+  html, body {
+      height: 100%;
+      display: block;
+      margin: 0px;
+      margin-top: 0px;
+      margin-right: 0px;
+      margin-bottom: 0px;
+      margin-left: 0px;
+  }
+
+  .bg {
+      /* The image used */
+      background-image: url("../assets/images/background-2.jpg");
+
+      /* Full height */
+      height: 100%;
+      width: 100%;
+
+      /* Center and scale the image nicely */
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+  }
+
+  .outer {
+    display: table;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.middle {
+    display: table-cell;
+    vertical-align: top;
+    text-align: center
+}
+
+.inner {
+    text-align: left;
+    /*margin-left: auto;*/
+    /*margin-right: auto;*/
+    width: 100%;
+}
+
+h1 {
+  font-family: "Courier New";
+}
+label {
+  font-family: "Courier New";
+  color: white;
+  padding-top: 20px;
+  padding-right: 50px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+}
+
+input {
+  webkit-appearance: textfield;
+  cursor: auto;
+  padding: 20px;
+  border-width: 1px;
+  /*border-style: inset;*/
+  border-color: initial;
+  /*border-image: initial;*/
+  margin-left: 20px;
+}
+
+div {
+  padding-bottom: 20px;
+}
+
+.form-group {
+  padding-left: 20px;
+}
+
+</style>
+</head>
+<body>
+  <div class="bg">
+    <div class="outer">
+      <div class="middle">
+        <div class="inner">
+          <form>
+            <h1>search</h1>
+              <label for="condition">Condition</label>
+              <div class="form-group">
+                  <select [(ngModel)]="condition" name="condition" class="form-control">
+                    <option value="new">New</option>
+                    <option value="like_new">Like new</option>
+                    <option value="excellent">Excellent</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="salvage">Salvage</option>
+                  </select>
+              </div>
+
+              <label for="cylinders">Cylinders</label>
+              <div class="form-group">
+                  <select [(ngModel)]="cylinders" name="cylinders" class="form-control">
+                    <option value="3">3 cylinders</option>
+                    <option value="4">4 cylinders</option>
+                    <option value="5">5 cylinders</option>
+                    <option value="6">6 cylinders</option>
+                    <option value="8">8 cylinders</option>
+                    <option value="10">10 cylinders</option>
+                    <option value="12">12 cylinders</option>
+                  </select>
+              </div>
+
+              <label for="drive_train">Drive train</label>
+              <div class="form-group">
+                  <select [(ngModel)]="drive_train" name="drive_train" class="form-control">
+                    <option value="fwd">Front wheel drive</option>
+                    <option value="rwd">Rear wheel drive</option>
+                    <option value="4wd">Four wheel drive</option>
+                  </select>
+              </div>
+
+              <label for="fuel">Fuel Type</label>
+              <div class="form-group">
+                  <select [(ngModel)]="fuel" name="fuel" class="form-control">
+                    <option value="gas">Gas</option>
+                    <option value="diesel">Diesel</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="electric">Electric</option>
+                  </select>
+              </div>
+
+              <label for="color">Color</label>
+              <div class="form-group">
+                  <select [(ngModel)]="color" name="color" class="form-control">
+                    <option value="black">Black</option>
+                    <option value="blue">Blue</option>
+                    <option value="brown">Brown</option>
+                    <option value="green">Green</option>
+                    <option value="grey">Grey</option>
+                    <option value="orange">Orange</option>
+                    <option value="purple">Purple</option>
+                    <option value="red">Red</option>
+                    <option value="silver">Silver</option>
+                    <option value="white">White</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="custom">Custom</option>
+                  </select>
+              </div>
+
+              <label for="size">Size</label>
+              <div class="form-group">
+                  <select [(ngModel)]="size" name="size" class="form-control">
+                    <option value="compact">Compact</option>
+                    <option value="full_size">Full size</option>
+                    <option value="mid_size">Mid size</option>
+                    <option value="sub_compact">Sub compact</option>
+                  </select>
+              </div>
+
+              <label for="title">Title</label>
+              <div class="form-group">
+                  <select [(ngModel)]="title" name="title" class="form-control">
+                    <option value="clean">Clean</option>
+                    <option value="salvage">Salvage</option>
+                    <option value="rebuilt">Rebuilt</option>
+                    <option value="parts only">Parts only</option>
+                    <option value="lien">Lien</option>
+                    <option value="missing">Missing</option>
+                  </select>
+              </div>
+
+              <label for="type">Type</label>
+              <div class="form-group">
+                  <select [(ngModel)]="type" name="type" class="form-control">
+                    <option value="bus">Bus</option>
+                    <option value="convertible">Convertible</option>
+                    <option value="coupe">Coupe</option>
+                    <option value="hatchback">Hatchback</option>
+                    <option value="mini_van">Mini van</option>
+                    <option value="offroad">Offroad</option>
+                    <option value="pickup">Pickup</option>
+                    <option value="sedan">Sedan</option>
+                    <option value="truck">Truck</option>
+                    <option value="suv">Suv</option>
+                    <option value="wagon">Wagon</option>
+                    <option value="van">Van</option>
+                    <option value="other">Other</option>
+                  </select>
+              </div>
+              <input type="submit" class="btn btn-success">
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

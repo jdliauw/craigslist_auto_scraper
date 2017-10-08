@@ -8,7 +8,6 @@ import re
 import requests
 import time
 from lxml import html
-# from bs4 import BeautifulSoup
 
 class Listing:
     """An individual listing"""
@@ -225,8 +224,6 @@ def run():
 
     start_urls = generate_start_urls(cities, keywords, parameters)
 
-    for start_url in start_urls:
-        print "\n", start_url
     il_urls = generate_individual_list_urls(start_urls)
 
     for il_url in il_urls:
@@ -236,8 +233,8 @@ def run():
         if listing is not None:
             listings.append(listing)
 
-    for listing in listings:
-        print listing.condition, listing.cylinders, listing.drive, listing.fuel, listing.list_price, listing.location, listing.make, listing.odometer, listing.paint_color, listing.size, listing.title_status, listing.transmission, listing.url, listing.vin
+    # for listing in listings:
+        # print listing.condition, listing.cylinders, listing.drive, listing.fuel, listing.list_price, listing.location, listing.make, listing.odometer, listing.paint_color, listing.size, listing.title_status, listing.transmission, listing.url, listing.vin
 
 if __name__ == "__main__":
     run()
