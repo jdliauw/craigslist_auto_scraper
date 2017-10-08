@@ -15,6 +15,7 @@ class Listing:
     cylinders = None
     drive = None
     fuel = None
+    list_price = None
     location = None
     make = None
     odometer = None
@@ -25,8 +26,8 @@ class Listing:
     url = None
     vin = None
 
-    def __init__(self, condition, cylinders, drive, fuel, location, make, odometer,
-                 paint_color, size, title_status, transmission, url, vin):
+    def __init__(self, condition, cylinders, drive, fuel, list_price, location, make,
+                 odometer, paint_color, size, title_status, transmission, url, vin):
         self.condition = condition
         self.cylinders = cylinders
         self.drive = drive
@@ -103,6 +104,11 @@ def parse_page(url):
     tree = html.fromstring(page.content)
     spans = tree.xpath("//p[@class='attrgroup']/span")
 
+    # return string instead of list and remove $
+    list_price = tree.xpath("//span[@class='price']/text()")[0][1:]
+    if list_price is None:
+        return None
+
     vin = None
     condition = None
     cylinders = None
@@ -124,7 +130,6 @@ def parse_page(url):
         if value != []:
             value = value[0]
 
-        # missing location and url
         if field != None:
             if "vin" in field:
                 vin = value
@@ -155,10 +160,10 @@ def parse_page(url):
     end_index = url.find(".craigs")
     location = url[start_index + 2:end_index]
 
-    print (condition, cylinders, drive, fuel, location, make, odometer,
-           paint_color, size, title_status, transmission, url, vin)
+    print (condition, cylinders, drive, fuel, list_price, location, make,
+           odometer, paint_color, size, title_status, transmission, url, vin)
 
-    return Listing(condition, cylinders, drive, fuel, location, make, odometer,
+    return Listing(condition, cylinders, drive, fuel, list_price, location, make, odometer,
                    paint_color, size, title_status, transmission, url, vin)
 
 def run():
