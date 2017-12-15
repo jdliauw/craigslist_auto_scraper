@@ -1,6 +1,11 @@
 """
 Craigslist Auto Scraper
 Kablam!
+
+TODO
+1. You are not searching all the pages...I forget the exact details
+2. Grab description
+3. Do the UI
 """
 
 import json
@@ -8,11 +13,13 @@ import re
 import requests
 import time
 from lxml import html
+import AdvancedHTMLParser
 
 class Listing:
     """An individual listing"""
     condition = None
     cylinders = None
+    description = None
     drive = None
     fuel = None
     list_price = None
@@ -20,31 +27,36 @@ class Listing:
     make = None
     odometer = None
     paint_color = None
+    post_date = None
     size = None
     title_status = None
     transmission = None
     url = None
     vin = None
+    images = []
 
-    def __init__(self, condition, cylinders, drive, fuel, list_price, location, make,
-                 odometer, paint_color, size, title_status, transmission, url, vin):
+    def __init__(self, condition, cylinders, description, drive, fuel, list_price, location, make, odometer,
+                 paint_color, post_date, size, title_status, transmission, url, vin, images):
         self.condition = condition
         self.cylinders = cylinders
+        self.description = description
         self.drive = drive
         self.fuel = fuel
         self.location = location
         self.make = make
         self.odometer = odometer
         self.paint_color = paint_color
+        self.post_date = post_date
         self.size = size
         self.title_status = title_status
         self.transmission = transmission
         self.url = url
         self.vin = vin
+        self.images = images
 
 def query_string_creation(parameters):
     """
-    craiglists query string filters are in the format: "&<field>=<value>""
+    craiglists query string filters are in the format: "&field=value"
     For example: &condition=10 represents a new condition
     Multiple conditions and fields can be chosen, and are just appended in the same format
     """
@@ -80,18 +92,18 @@ def query_string_creation(parameters):
                 query_string += "{0}{1}".format(field, fields[field][field_value])
     return query_string
 
-def generate_start_urls(cities, keywords, parameters):
+def generate_start_urls(cities, search_queries, parameters):
     """Generate start URLs"""
     start_urls = []
 
     for city in cities:
-        for keyword in keywords:
+        for search_query in search_queries:
             # format for query string
-            if " " in keyword:
-                keyword = keyword.strip().replace(" ", "+")
+            if " " in search_query:
+                search_query = search_query.strip().replace(" ", "+")
 
             query_string = query_string_creation(parameters)
-            start_urls.append("http://{0}.craigslist.org/search/sss?query={1}{2}".format(city, keyword, query_string))
+            start_urls.append("http://{0}.craigslist.org/search/sss?query={1}{2}".format(city, search_query, query_string))
     return start_urls
 
 def generate_individual_list_urls(start_urls):
@@ -106,28 +118,49 @@ def generate_individual_list_urls(start_urls):
 
 def parse_page(url):
     """Parse page"""
-    page = requests.get(url)
-    tree = html.fromstring(page.content)
-    spans = tree.xpath("//p[@class='attrgroup']/span")
 
-    # return string instead of list and remove $
-    list_price = tree.xpath("//span[@class='price']/text()")
-    if list_price is None or list_price == []:
-        return None
-    list_price = list_price[0][1:]
+    url = "https://austin.craigslist.org/cto/d/2017-4x4-mercedes-sprinter/6399196479.html"
+    url = "https://denver.craigslist.org/rvd/d/2018-roadtrek-ss-agile-class/6404690540.html"
 
     vin = None
     condition = None
     cylinders = None
+    description = None
     drive = None
     fuel = None
     odometer = None
     paint_color = None
+    post_date = None
     size = None
     title_status = None
     transmission = None
     make = None
 
+    page = requests.get(url)
+    tree = html.fromstring(page.content)
+
+    images = tree.xpath("//a[@class='thumb']/@href")
+    list_price = tree.xpath("//span[@class='price']/text()")
+    post_date = tree.xpath("//time[@class='date timeago']")[0].text.strip()[:10]
+    spans = tree.xpath("//p[@class='attrgroup']/span")
+
+    # description
+    description = ""
+    parser = AdvancedHTMLParser.AdvancedHTMLParser()
+    parser.parseStr(page.content)
+    posting_body = parser.getElementById('postingbody')
+    description = posting_body.innerHTML
+
+    # images: need to have more than just one image
+    if len(images) < 1:
+        return None
+
+    # list_price: return string instead of list and remove $
+    if list_price is None or list_price == []:
+        return None
+    list_price = list_price[0][1:]
+
+    # spans
     for span in spans:
         field = span.text
         if field != None:
@@ -168,11 +201,8 @@ def parse_page(url):
     end_index = url.find(".craigs")
     location = url[start_index + 2:end_index]
 
-    # print (condition, cylinders, drive, fuel, list_price, location, make,
-    #        odometer, paint_color, size, title_status, transmission, url, vin)
-
-    return Listing(condition, cylinders, drive, fuel, list_price, location, make, odometer,
-                   paint_color, size, title_status, transmission, url, vin)
+    return Listing(condition, cylinders, description, drive, fuel, list_price, location, make, odometer,
+                   paint_color, post_date, size, title_status, transmission, url, vin, images)
 
 def run():
     """main"""
@@ -182,7 +212,7 @@ def run():
               # "austin",
               # "boston",
               # "chicago",
-              "dallas",
+              # "dallas",
               "denver",
               # "detroit",
               # "houston",
@@ -201,28 +231,27 @@ def run():
               # "sfbay",
         ]
 
-    keywords = ["mercedes benz sprinter",
-                # "minibus",
-                # "dodge promaster",
+    search_queries = ["mercedes benz sprinter",
+                "dodge promaster",
                 # "ford transit",
                 # "nissan nv",
                 # "minibus",
     ]
 
-    parameters = "new,white,sedan,rwd,gas,clean,automatic"
+    # this is your search query. all available params in query_string_creation()
+    # parameters = "new,white,sedan,rwd,gas,clean,automatic"
 
-    # json from django
     json_response = json.dumps(
         {"cities":cities,
-         "keywords":keywords,
+         "search_queries":search_queries,
          "parameters":"new"}
     )
     decoded_json = json.loads(json_response)
     cities = decoded_json["cities"]
-    keywords = decoded_json["keywords"]
+    search_queries = decoded_json["search_queries"]
     parameters = decoded_json["parameters"]
 
-    start_urls = generate_start_urls(cities, keywords, parameters)
+    start_urls = generate_start_urls(cities, search_queries, parameters)
 
     il_urls = generate_individual_list_urls(start_urls)
 
@@ -233,8 +262,11 @@ def run():
         if listing is not None:
             listings.append(listing)
 
-    # for listing in listings:
-        # print listing.condition, listing.cylinders, listing.drive, listing.fuel, listing.list_price, listing.location, listing.make, listing.odometer, listing.paint_color, listing.size, listing.title_status, listing.transmission, listing.url, listing.vin
+    for listing in listings:
+        print listing.condition, listing.cylinders, listing.description, listing.drive,
+        listing.fuel, listing.list_price, listing.location, listing.make, listing.odometer,
+        listing.paint_color, listing.post_date, listing.size, listing.title_status,
+        listing.transmission, listing.url, listing.vin, listing.images
 
 if __name__ == "__main__":
     run()
